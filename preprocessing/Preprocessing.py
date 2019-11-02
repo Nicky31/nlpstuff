@@ -18,10 +18,12 @@ class Preprocessing:
      """
           Corpus is a list of strings
      """
-     def __init__(self, lang, remove_stopwords=True, lemmatize=True, tokenizer='spacy'):
+     def __init__(self, lang, remove_stopwords=True, lemmatize=True, tokenizer='nltk'):
           self.lang = lang
-          self.spacy = get_spacy_nlp(lang)
-          self.stopwords = set(stopwords.words('french'))
+          if tokenizer == 'spacy':
+               self.spacy = get_spacy_nlp(lang)
+          elif tokenizer == 'nltk':
+               self.stopwords = set(stopwords.words('french'))
 
           self.lemmatize = lemmatize
           self.remove_stopwords = remove_stopwords
@@ -57,9 +59,11 @@ class Preprocessing:
                return word_tokenize(s)
           return [w for w in word_tokenize(s) if not w in self.stopwords]
 
-     def __call__(self, s):
-          return self.tokenize(
-               s=self.clean(s),
-               remove_stopwords=self.remove_stopwords,
-               lemmatize=self.lemmatize
-          )          
+     def __call__(self, sentences):
+          return [
+               "{}\n".format(" ".join(self.tokenize(
+                    s=self.clean(s),
+                    remove_stopwords=self.remove_stopwords,
+                    lemmatize=self.lemmatize
+               ))) for s in sentences
+          ]

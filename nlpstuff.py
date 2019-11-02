@@ -46,11 +46,12 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--filepath", help="Dataset or model filepath if reosurce not registered")
     parser.add_argument("-l", "--language", help="fr, en, es, ...")
     parser.add_argument("--training-out", help="Filepath of generated training file. Defaults to DATASET_DIR config")
+    parser.add_argument("-t", "--tokenizer", choices=["spacy", "nltk"], help="Set a specific tokenizer", default="nltk")
 
     parser.add_argument("-m", "--model", help="Model ID")
     parser.add_argument("-w", "--window", help="Window size")
     parser.add_argument("--no-pb", help="Disable progress bar", action="store_true")
-    parser.add_argument("-t", "--tokenizer", choices=["spacy", "nltk"], help="Set a specific tokenizer", default="nltk")
+    parser.add_argument("--workers", help="Number of workers for preprocessing & training")
     args = parser.parse_args()
 
     if args.action in ("preprocess", "train"):
