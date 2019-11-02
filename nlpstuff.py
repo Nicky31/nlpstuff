@@ -11,19 +11,19 @@ from training import train_model, load_model
 from preprocessing import get_training_file
 
 def training_stage(action, args):
-    if args.filepath:
-        filename = os.path.split(args.filepath)[-1]
+    try:
+        dataset = DATASETS[args.resource]
+    except KeyError:
+        if not os.path.exists(args.resource):
+            raise Exception("Please specify a valid dataset id or path.")
+        filename = os.path.split(args.resource)[-1]
         dataset = Resource(
             filename=filename,
-            filepath=args.filepath,
+            filepath=args.resource,
             dataset=filename,
             lang=args.language
         )
-    elif args.dataset:
-        dataset = DATASETS[args.dataset]
-    else:
-        raise Exception("Missing --dataset or --filepath.")
-
+        
     if args.training_out:
         dataset = dataset._replace(cached_training_filepath=args.training_out)
     
@@ -42,8 +42,8 @@ def training_stage(action, args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("action", choices=["preprocess", "train"])
-    parser.add_argument("-d", "--dataset", choices=list(DATASETS.keys()), help="Dataset id to work with")
-    parser.add_argument("-p", "--filepath", help="Dataset or model filepath if reosurce not registered")
+    existing_datasets = list(DATASETS.keys())
+    parser.add_argument("resource", help="Dataset id/path if preprocessing / training, otherwise model id / path. \n Available datasets : {}".format(existing_datasets))
     parser.add_argument("-l", "--language", help="fr, en, es, ...")
     parser.add_argument("--training-out", help="Filepath of generated training file. Defaults to DATASET_DIR config")
     parser.add_argument("-t", "--tokenizer", choices=["spacy", "nltk"], help="Set a specific tokenizer", default="nltk")
@@ -54,6 +54,9 @@ if __name__ == "__main__":
     parser.add_argument("--workers", help="Number of workers for preprocessing & training")
     args = parser.parse_args()
 
-    if args.action in ("preprocess", "train"):
-        training_stage(args.action, args)
+    try:
+        if args.action in ("preprocess", "train"):
+            training_stage(args.action, args)
+    except Exception as e:
+        print("An exception occured : {}".format(e), file=sys.stderr)
 
