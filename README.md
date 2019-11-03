@@ -10,6 +10,7 @@ As its name suggests, nlpstuff gathers common NLP tasks in a single tool while p
     * lemmatization (spacy)
 * **model training**
     * word2vec (cbow) 
+    * fastText (cbow)
 
 ### Preprocessing
 
