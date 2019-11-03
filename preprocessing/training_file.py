@@ -14,12 +14,13 @@ from .Preprocessing import Preprocessing
 def get_training_file(
 	dataset, use_cache=True, batch_size=1,
 	lemmatize=True, remove_stopwords=True,
-	progressbar=False, tokenizer="spacy",
-	num_workers=4
+	progressbar=False, tokenizer="nltk",
+	workers=4
 ):
-	out_filepath = dataset.cached_training_filepath
+	out_filepath = dataset.preprocessed_filepath
 	if use_cache and os.path.exists(out_filepath):
-		return dataset.cached_training_filepath
+		print("Using cached preprocessed training file from '{}'.".format(dataset.preprocessed_filepath))
+		return dataset.preprocessed_filepath
 	
 	# No cache,reate training file
 	try:
@@ -42,7 +43,7 @@ def get_training_file(
 		lemmatize=lemmatize,
 		remove_stopwords=remove_stopwords,
 		tokenizer=tokenizer,
-		num_workers=num_workers,
+		workers=workers,
 		output_queue=output_queue,
 		progressbar=progressbar
 	)
@@ -60,7 +61,7 @@ def get_training_file(
 """
 def parallelized_preprocessing(
 	dataset_file, lang, lemmatize,
-	remove_stopwords, tokenizer, num_workers,
+	remove_stopwords, tokenizer, workers,
 	output_queue, progressbar
 ):
 	preprocessing = Preprocessing(
@@ -70,7 +71,7 @@ def parallelized_preprocessing(
 		tokenizer=tokenizer
 	)
 
-	pool = mp.Pool(num_workers if num_workers is not None else 4)
+	pool = mp.Pool(workers if workers is not None else 4)
 	jobs = []
 	# Divide training file in chunk and distribute them to the processes pool
 	chunks = list(chunkify(dataset_file))
