@@ -35,7 +35,8 @@ def training_stage(action, args):
             remove_stopwords=True,
             progressbar=False if args.no_pb else True,
             tokenizer=args.tokenizer,
-            workers=args.workers
+            workers=args.workers,
+            chunk_size=args.chunk_size
         )
     elif action == "train":
         train_model(
@@ -63,10 +64,10 @@ if __name__ == "__main__":
     # preprocess command
     preprocess_parser = subparsers.add_parser('preprocess', help='Training corpus preprocessing command')    
     preprocess_parser.add_argument("dataset", help="Dataset id/path to preprocess. \n Available datasets : {}".format(existing_datasets))
-    preprocess_parser.add_argument("dataset", help="Dataset id/path to preprocess. \n Available datasets : {}".format(existing_datasets))
     preprocess_parser.add_argument("-l", "--language", help="fr, en, es, ...")
     preprocess_parser.add_argument("-o", "--out", help="Output preprocessed file path. Defaults to DATASET_DIR")
     preprocess_parser.add_argument("-t", "--tokenizer", choices=["spacy", "nltk"], help="Set a specific tokenizer", default="nltk")
+    preprocess_parser.add_argument("--chunk-size", type=int, help="Size of dataset chunks distributed across the workers (bytes).", default=1024*256)
 
     # train command
     train_parser = subparsers.add_parser('train', help='Model training command')    

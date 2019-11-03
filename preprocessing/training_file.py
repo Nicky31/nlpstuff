@@ -15,7 +15,7 @@ def get_training_file(
 	dataset, use_cache=True, batch_size=1,
 	lemmatize=True, remove_stopwords=True,
 	progressbar=False, tokenizer="nltk",
-	workers=4
+	workers=4, chunk_size=1024*256
 ):
 	out_filepath = dataset.preprocessed_filepath
 	if use_cache and os.path.exists(out_filepath):
@@ -45,7 +45,8 @@ def get_training_file(
 		tokenizer=tokenizer,
 		workers=workers,
 		output_queue=output_queue,
-		progressbar=progressbar
+		progressbar=progressbar,
+		chunk_size=chunk_size
 	)
 
 	# Wait for output buffer writting
@@ -61,7 +62,8 @@ def get_training_file(
 """
 def parallelized_preprocessing(
 	dataset_file, lang, lemmatize,
-	remove_stopwords, tokenizer, workers,
+	remove_stopwords, tokenizer,
+	workers, chunk_size,
 	output_queue, progressbar
 ):
 	preprocessing = Preprocessing(
@@ -74,7 +76,7 @@ def parallelized_preprocessing(
 	pool = mp.Pool(workers if workers is not None else 4)
 	jobs = []
 	# Divide training file in chunk and distribute them to the processes pool
-	chunks = list(chunkify(dataset_file))
+	chunks = list(chunkify(dataset_file, chunk_size))
 	for chunk_start, chunk_size in chunks:
 		jobs.append(pool.apply_async(preprocess_wrapper, (dataset_file, preprocessing, chunk_start, chunk_size, output_queue)))
 
